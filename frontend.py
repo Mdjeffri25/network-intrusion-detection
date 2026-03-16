@@ -22,7 +22,7 @@ st.set_page_config(
 def load_models():
     try:
         # Load Deep Learning model
-        model = keras.models.load_model("dl_model.h5")
+        model = tf.keras.models.load_model("dl_model.h5", compile=False)
         
         # Load preprocessing objects
         scaler = joblib.load("scaler.pkl")
