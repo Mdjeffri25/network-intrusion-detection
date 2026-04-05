@@ -170,11 +170,11 @@ if page == "🔍 Intrusion Detection":
     col1, col2, col3, col4 = st.columns(4)
     with col1:
     st.markdown('<div class="metric-card"><h3>🕒 Total Connections</h3><h2>1,204</h2></div>', unsafe_allow_html=True)
-with col2:
+    with col2:
     st.markdown('<div class="metric-card"><h3>✅ Normal Traffic</h3><h2>690</h2></div>', unsafe_allow_html=True)
-with col3:
+    with col3:
     st.markdown('<div class="metric-card"><h3>🚨 Intrusions</h3><h2>247</h2></div>', unsafe_allow_html=True)
-with col4:
+    with col4:
     st.markdown('<div class="metric-card"><h3>📊 Detection Rate</h3><h2>98.5%</h2></div>', unsafe_allow_html=True)
 
     st.markdown("---")
