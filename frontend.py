@@ -20,7 +20,7 @@ st.set_page_config(
 @st.cache_resource
 def load_models():
     try:
-        model = tf.keras.models.load_model("dl_model.h5", compile=False)
+        model = tf.keras.models.load_model("dl_model.keras")
         scaler = joblib.load("scaler.pkl")
         label_encoders = joblib.load("label_encoders.pkl")
         target_encoder = joblib.load("target_encoder.pkl")
