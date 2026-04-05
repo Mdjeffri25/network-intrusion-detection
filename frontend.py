@@ -20,7 +20,6 @@ st.set_page_config(
 @st.cache_resource
 def load_models():
     try:
-        # Build model architecture from scratch
         inputs = keras.Input(shape=(41,))
         x = layers.Dense(128, activation='relu', name='dense')(inputs)
         x = layers.BatchNormalization(name='batch_normalization')(x)
@@ -99,32 +98,60 @@ st.markdown("""
     .title {
         text-align: center;
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        padding: 2rem; border-radius: 10px; margin-bottom: 2rem;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
     }
     .title h1 { color: white; font-size: 2.5rem; margin: 0; }
     .title p { color: #f0f0f0; font-size: 1.2rem; margin-top: 0.5rem; }
     .metric-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1rem; border-radius: 10px; color: white; text-align: center;
+        padding: 1rem;
+        border-radius: 10px;
+        color: white;
+        text-align: center;
+        height: 130px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
+    .metric-card h3 { font-size: 1rem; margin: 0 0 0.5rem 0; }
+    .metric-card h2 { font-size: 1.8rem; margin: 0; }
     .section-header {
         background: linear-gradient(90deg, #f3f4f6 0%, #ffffff 100%);
-        padding: 1rem; border-radius: 8px; margin: 1rem 0;
-        border-left: 5px solid #667eea; font-weight: bold; color: #333;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        border-left: 5px solid #667eea;
+        font-weight: bold;
+        color: #333;
     }
     .success-message {
         background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
-        color: white; padding: 2rem; border-radius: 10px; text-align: center; font-size: 1.5rem;
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
+        font-size: 1.5rem;
     }
     .error-message {
         background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
-        color: white; padding: 2rem; border-radius: 10px; text-align: center; font-size: 1.5rem;
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
+        font-size: 1.5rem;
     }
     .stButton > button {
         width: 100%;
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        color: white; font-weight: bold; font-size: 1.2rem;
-        padding: 0.75rem; border: none; border-radius: 8px;
+        color: white;
+        font-weight: bold;
+        font-size: 1.2rem;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 8px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -169,13 +196,13 @@ with st.sidebar:
 if page == "🔍 Intrusion Detection":
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-    st.markdown('<div class="metric-card"><h3>🕒 Total Connections</h3><h2>1,204</h2></div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-card"><h3>🕒 Total Connections</h3><h2>1,234</h2></div>', unsafe_allow_html=True)
     with col2:
-    st.markdown('<div class="metric-card"><h3>✅ Normal Traffic</h3><h2>690</h2></div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-card"><h3>✅ Normal Traffic</h3><h2>987</h2></div>', unsafe_allow_html=True)
     with col3:
-    st.markdown('<div class="metric-card"><h3>🚨 Intrusions</h3><h2>247</h2></div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-card"><h3>🚨 Intrusions</h3><h2>247</h2></div>', unsafe_allow_html=True)
     with col4:
-    st.markdown('<div class="metric-card"><h3>📊 Detection Rate</h3><h2>98.5%</h2></div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-card"><h3>📊 Detection Rate</h3><h2>98.5%</h2></div>', unsafe_allow_html=True)
 
     st.markdown("---")
     tab1, tab2, tab3, tab4 = st.tabs(["🌐 Connection Info", "📦 Traffic Data", "🔐 Security Metrics", "📈 Host Statistics"])
@@ -280,19 +307,22 @@ if page == "🔍 Intrusion Detection":
         dst_host_diff_srv_rate = st.slider("🎯 Host Different Service Rate", min_value=0.0, max_value=1.0, step=0.01,
                                            value=st.session_state.random_values["dst_host_diff_srv_rate"])
         dst_host_same_src_port_rate = st.slider("🎯 Host Same Source Port Rate", min_value=0.0, max_value=1.0,
-                                                step=0.01, value=st.session_state.random_values["dst_host_same_src_port_rate"])
+                                                step=0.01,
+                                                value=st.session_state.random_values["dst_host_same_src_port_rate"])
     with col2:
         dst_host_srv_diff_host_rate = st.slider("🎯 Host Service Diff Rate", min_value=0.0, max_value=1.0, step=0.01,
                                                 value=st.session_state.random_values["dst_host_srv_diff_host_rate"])
         dst_host_serror_rate = st.slider("🎯 Host SYN Error Rate", min_value=0.0, max_value=1.0, step=0.01,
                                          value=st.session_state.random_values["dst_host_serror_rate"])
         dst_host_srv_serror_rate = st.slider("🎯 Host Service SYN Error Rate", min_value=0.0, max_value=1.0,
-                                             step=0.01, value=st.session_state.random_values["dst_host_srv_serror_rate"])
+                                             step=0.01,
+                                             value=st.session_state.random_values["dst_host_srv_serror_rate"])
     with col3:
         dst_host_rerror_rate = st.slider("🎯 Host REJ Error Rate", min_value=0.0, max_value=1.0, step=0.01,
                                          value=st.session_state.random_values["dst_host_rerror_rate"])
         dst_host_srv_rerror_rate = st.slider("🎯 Host Service REJ Error Rate", min_value=0.0, max_value=1.0,
-                                             step=0.01, value=st.session_state.random_values["dst_host_srv_rerror_rate"])
+                                             step=0.01,
+                                             value=st.session_state.random_values["dst_host_srv_rerror_rate"])
 
     input_features = [
         duration, protocol_encoded, service_encoded, flag_encoded,
@@ -350,7 +380,8 @@ if page == "🔍 Intrusion Detection":
         for i, class_name in enumerate(class_names):
             color = 'green' if class_name.lower() == 'normal' else 'red'
             fig.add_trace(go.Bar(
-                name=class_name, x=[class_name],
+                name=class_name,
+                x=[class_name],
                 y=[prediction_proba[0][i] * 100],
                 marker_color=color,
                 text=[f'{prediction_proba[0][i]*100:.1f}%'],
@@ -411,14 +442,16 @@ elif page == "📊 Model Performance":
             z=conf_matrix,
             x=['Predicted anomaly', 'Predicted normal'],
             y=['Actual anomaly', 'Actual normal'],
-            text=conf_matrix, texttemplate="%{text}",
-            textfont={"size": 16}, colorscale='Blues'
+            text=conf_matrix,
+            texttemplate="%{text}",
+            textfont={"size": 16},
+            colorscale='Blues'
         ))
         fig_cm.update_layout(title="Confusion Matrix", height=400)
         st.plotly_chart(fig_cm, use_container_width=True)
     with col2:
         st.markdown("### 📊 Performance Metrics")
-        tp, fn, fp, tn = conf_matrix[0,0], conf_matrix[0,1], conf_matrix[1,0], conf_matrix[1,1]
+        tp, fn, fp, tn = conf_matrix[0, 0], conf_matrix[0, 1], conf_matrix[1, 0], conf_matrix[1, 1]
         accuracy = (tp + tn) / (tp + tn + fp + fn)
         st.metric("Accuracy", f"{accuracy*100:.2f}%")
         st.metric("Precision", "99%")
