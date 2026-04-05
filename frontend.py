@@ -21,19 +21,15 @@ st.set_page_config(
 @st.cache_resource
 def load_models():
     try:
-        # Load Deep Learning model
-       model = tf.keras.models.load_model("dl_model.h5", compile=False)
-        
-        # Load preprocessing objects
+        model = tf.keras.models.load_model("dl_model.h5", compile=False)
         scaler = joblib.load("scaler.pkl")
         label_encoders = joblib.load("label_encoders.pkl")
         target_encoder = joblib.load("target_encoder.pkl")
-        
         return model, scaler, label_encoders, target_encoder
     except Exception as e:
-        st.error(f"⚠️ Model files not found. Please ensure all model files are in the correct directory. Error: {e}")
+        st.error(f"Model files not found. Error: {e}")
         return None, None, None, None
-
+        
 # Load models and preprocessing objects
 model, scaler, label_encoders, target_encoder = load_models()
 
