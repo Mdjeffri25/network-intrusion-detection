@@ -8,8 +8,8 @@ from datetime import datetime
 import time
 import tensorflow as tf
 from tensorflow import keras
+from tensorflow.keras import layers
 
-# Page configuration
 st.set_page_config(
     page_title="Network Intrusion Detection System",
     page_icon="🛡️",
@@ -20,7 +20,24 @@ st.set_page_config(
 @st.cache_resource
 def load_models():
     try:
-        model = tf.keras.models.load_model("dl_model.keras")
+        # Build model architecture from scratch
+        inputs = keras.Input(shape=(41,))
+        x = layers.Dense(128, activation='relu', name='dense')(inputs)
+        x = layers.BatchNormalization(name='batch_normalization')(x)
+        x = layers.Dropout(0.3)(x)
+        x = layers.Dense(64, activation='relu', name='dense_1')(x)
+        x = layers.BatchNormalization(name='batch_normalization_1')(x)
+        x = layers.Dropout(0.3)(x)
+        x = layers.Dense(32, activation='relu', name='dense_2')(x)
+        x = layers.BatchNormalization(name='batch_normalization_2')(x)
+        x = layers.Dropout(0.2)(x)
+        outputs = layers.Dense(2, activation='softmax', name='dense_3')(x)
+        model = keras.Model(inputs, outputs)
+        dummy = np.zeros((1, 41))
+        model.predict(dummy, verbose=0)
+        data = np.load("model_weights.npz")
+        weight_list = [data[k] for k in sorted(data.files, key=lambda x: int(x.replace('arr_', '')))]
+        model.set_weights(weight_list)
         scaler = joblib.load("scaler.pkl")
         label_encoders = joblib.load("label_encoders.pkl")
         target_encoder = joblib.load("target_encoder.pkl")
@@ -82,63 +99,32 @@ st.markdown("""
     .title {
         text-align: center;
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        padding: 2rem;
-        border-radius: 10px;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem; border-radius: 10px; margin-bottom: 2rem;
     }
-    .title h1 { color: white; font-size: 2.5rem; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+    .title h1 { color: white; font-size: 2.5rem; margin: 0; }
     .title p { color: #f0f0f0; font-size: 1.2rem; margin-top: 0.5rem; }
     .metric-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1rem;
-        border-radius: 10px;
-        color: white;
-        text-align: center;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 1rem; border-radius: 10px; color: white; text-align: center;
     }
     .section-header {
         background: linear-gradient(90deg, #f3f4f6 0%, #ffffff 100%);
-        padding: 1rem;
-        border-radius: 8px;
-        margin: 1rem 0;
-        border-left: 5px solid #667eea;
-        font-weight: bold;
-        color: #333;
+        padding: 1rem; border-radius: 8px; margin: 1rem 0;
+        border-left: 5px solid #667eea; font-weight: bold; color: #333;
     }
     .success-message {
         background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
-        color: white;
-        padding: 2rem;
-        border-radius: 10px;
-        text-align: center;
-        font-size: 1.5rem;
+        color: white; padding: 2rem; border-radius: 10px; text-align: center; font-size: 1.5rem;
     }
     .error-message {
         background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
-        color: white;
-        padding: 2rem;
-        border-radius: 10px;
-        text-align: center;
-        font-size: 1.5rem;
+        color: white; padding: 2rem; border-radius: 10px; text-align: center; font-size: 1.5rem;
     }
     .stButton > button {
         width: 100%;
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        font-weight: bold;
-        font-size: 1.2rem;
-        padding: 0.75rem;
-        border: none;
-        border-radius: 8px;
-    }
-    .footer {
-        text-align: center;
-        padding: 2rem;
-        background: linear-gradient(90deg, #f3f4f6 0%, #ffffff 100%);
-        border-radius: 10px;
-        margin-top: 2rem;
-        color: #666;
+        color: white; font-weight: bold; font-size: 1.2rem;
+        padding: 0.75rem; border: none; border-radius: 8px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -156,8 +142,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if model is None or label_encoders is None or scaler is None:
-    st.error("Cannot load models. Please ensure all model files exist in the current directory.")
-    st.info("Required files: dl_model.h5, scaler.pkl, label_encoders.pkl, target_encoder.pkl")
+    st.error("Cannot load models. Please ensure all model files exist.")
+    st.info("Required files: model_weights.npz, scaler.pkl, label_encoders.pkl, target_encoder.pkl")
     st.stop()
 
 with st.sidebar:
@@ -178,8 +164,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### 📊 System Status")
     st.markdown("🟢 Model: Deep Learning (TensorFlow)")
-    st.markdown("🟢 API: Connected")
-    st.markdown("🟢 Database: Ready")
+    st.markdown("🟢 Status: Connected")
 
 if page == "🔍 Intrusion Detection":
     col1, col2, col3, col4 = st.columns(4)
@@ -193,7 +178,6 @@ if page == "🔍 Intrusion Detection":
         st.markdown('<div class="metric-card"><h3>📊 Detection Rate</h3><h2>98.5%</h2></div>', unsafe_allow_html=True)
 
     st.markdown("---")
-
     tab1, tab2, tab3, tab4 = st.tabs(["🌐 Connection Info", "📦 Traffic Data", "🔐 Security Metrics", "📈 Host Statistics"])
 
     with tab1:
@@ -264,12 +248,10 @@ if page == "🔍 Intrusion Detection":
         st.markdown('<div class="section-header">📊 Network Statistics</div>', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1:
-            st.markdown("**Basic Counts**")
             count = st.slider("📊 Connection Count", min_value=1, max_value=511,
                               value=st.session_state.random_values["count"])
             srv_count = st.slider("🔄 Service Count", min_value=1, max_value=511,
                                   value=st.session_state.random_values["srv_count"])
-            st.markdown("**Error Rates**")
             serror_rate = st.slider("⚠️ SYN Error Rate", min_value=0.0, max_value=1.0, step=0.01,
                                     value=st.session_state.random_values["serror_rate"])
             srv_serror_rate = st.slider("⚠️ Service SYN Error Rate", min_value=0.0, max_value=1.0, step=0.01,
@@ -279,14 +261,12 @@ if page == "🔍 Intrusion Detection":
             srv_rerror_rate = st.slider("❌ Service REJ Error Rate", min_value=0.0, max_value=1.0, step=0.01,
                                         value=st.session_state.random_values["srv_rerror_rate"])
         with col2:
-            st.markdown("**Service Rates**")
             same_srv_rate = st.slider("🔄 Same Service Rate", min_value=0.0, max_value=1.0, step=0.01,
                                       value=st.session_state.random_values["same_srv_rate"])
             diff_srv_rate = st.slider("🔄 Different Service Rate", min_value=0.0, max_value=1.0, step=0.01,
                                       value=st.session_state.random_values["diff_srv_rate"])
             srv_diff_host_rate = st.slider("🔄 Service Diff Host Rate", min_value=0.0, max_value=1.0, step=0.01,
                                            value=st.session_state.random_values["srv_diff_host_rate"])
-            st.markdown("**Host Statistics**")
             dst_host_count = st.slider("🎯 Destination Host Count", min_value=0, max_value=255,
                                        value=st.session_state.random_values["dst_host_count"])
             dst_host_srv_count = st.slider("🎯 Destination Host Service Count", min_value=0, max_value=255,
@@ -300,22 +280,19 @@ if page == "🔍 Intrusion Detection":
         dst_host_diff_srv_rate = st.slider("🎯 Host Different Service Rate", min_value=0.0, max_value=1.0, step=0.01,
                                            value=st.session_state.random_values["dst_host_diff_srv_rate"])
         dst_host_same_src_port_rate = st.slider("🎯 Host Same Source Port Rate", min_value=0.0, max_value=1.0,
-                                                step=0.01,
-                                                value=st.session_state.random_values["dst_host_same_src_port_rate"])
+                                                step=0.01, value=st.session_state.random_values["dst_host_same_src_port_rate"])
     with col2:
         dst_host_srv_diff_host_rate = st.slider("🎯 Host Service Diff Rate", min_value=0.0, max_value=1.0, step=0.01,
                                                 value=st.session_state.random_values["dst_host_srv_diff_host_rate"])
         dst_host_serror_rate = st.slider("🎯 Host SYN Error Rate", min_value=0.0, max_value=1.0, step=0.01,
                                          value=st.session_state.random_values["dst_host_serror_rate"])
         dst_host_srv_serror_rate = st.slider("🎯 Host Service SYN Error Rate", min_value=0.0, max_value=1.0,
-                                             step=0.01,
-                                             value=st.session_state.random_values["dst_host_srv_serror_rate"])
+                                             step=0.01, value=st.session_state.random_values["dst_host_srv_serror_rate"])
     with col3:
         dst_host_rerror_rate = st.slider("🎯 Host REJ Error Rate", min_value=0.0, max_value=1.0, step=0.01,
                                          value=st.session_state.random_values["dst_host_rerror_rate"])
         dst_host_srv_rerror_rate = st.slider("🎯 Host Service REJ Error Rate", min_value=0.0, max_value=1.0,
-                                             step=0.01,
-                                             value=st.session_state.random_values["dst_host_srv_rerror_rate"])
+                                             step=0.01, value=st.session_state.random_values["dst_host_srv_rerror_rate"])
 
     input_features = [
         duration, protocol_encoded, service_encoded, flag_encoded,
@@ -328,8 +305,7 @@ if page == "🔍 Intrusion Detection":
         dst_host_count, dst_host_srv_count, dst_host_same_srv_rate,
         dst_host_diff_srv_rate, dst_host_same_src_port_rate,
         dst_host_srv_diff_host_rate, dst_host_serror_rate,
-        dst_host_srv_serror_rate, dst_host_rerror_rate,
-        dst_host_srv_rerror_rate
+        dst_host_srv_serror_rate, dst_host_rerror_rate, dst_host_srv_rerror_rate
     ]
 
     input_data = np.array(input_features).reshape(1, -1)
@@ -340,8 +316,8 @@ if page == "🔍 Intrusion Detection":
         predict_button = st.button("🔍 Analyze Network Traffic (Deep Learning)", use_container_width=True)
 
     if predict_button:
-        with st.spinner("🔄 Deep Learning model analyzing network traffic..."):
-            time.sleep(1.5)
+        with st.spinner("🔄 Analyzing network traffic..."):
+            time.sleep(1)
             prediction_proba = model.predict(input_data_scaled, verbose=0)
             prediction = np.argmax(prediction_proba, axis=1)[0]
             class_names = target_encoder.classes_
@@ -374,8 +350,7 @@ if page == "🔍 Intrusion Detection":
         for i, class_name in enumerate(class_names):
             color = 'green' if class_name.lower() == 'normal' else 'red'
             fig.add_trace(go.Bar(
-                name=class_name,
-                x=[class_name],
+                name=class_name, x=[class_name],
                 y=[prediction_proba[0][i] * 100],
                 marker_color=color,
                 text=[f'{prediction_proba[0][i]*100:.1f}%'],
@@ -399,12 +374,11 @@ elif page == "📊 Model Performance":
         - **Hidden Layer 1**: 128 neurons (ReLU) + BatchNorm + Dropout 30%
         - **Hidden Layer 2**: 64 neurons (ReLU) + BatchNorm + Dropout 30%
         - **Hidden Layer 3**: 32 neurons (ReLU) + BatchNorm + Dropout 20%
-        - **Output Layer**: Softmax activation (2 classes)
+        - **Output Layer**: Softmax (2 classes)
         - **Optimizer**: Adam
-        - **Loss Function**: Sparse Categorical Crossentropy
+        - **Loss**: Sparse Categorical Crossentropy
         - **Total Parameters**: 16,674
         """)
-        st.markdown("### 🎯 Classification Report")
         report_data = {
             'Class': ['anomaly', 'normal'],
             'Precision': [0.99, 0.99],
@@ -412,13 +386,10 @@ elif page == "📊 Model Performance":
             'F1-Score': [0.99, 0.99],
             'Support': [2349, 2690]
         }
-        report_df = pd.DataFrame(report_data)
-        st.dataframe(report_df.style.format({'Precision': '{:.2f}', 'Recall': '{:.2f}', 'F1-Score': '{:.2f}'}),
-                     use_container_width=True)
-        st.markdown("**Overall Accuracy:** 99%\n**Macro Avg F1-Score:** 0.99\n**Weighted Avg F1-Score:** 0.99")
+        st.dataframe(pd.DataFrame(report_data), use_container_width=True)
+        st.markdown("**Overall Accuracy: 99%**")
 
     with col2:
-        st.markdown("### 📈 Training History")
         epochs = list(range(1, 22))
         train_acc = [0.9411, 0.9670, 0.9738, 0.9778, 0.9798, 0.9814, 0.9802, 0.9827, 0.9831, 0.9835,
                      0.9842, 0.9854, 0.9846, 0.9867, 0.9857, 0.9853, 0.9894, 0.9889, 0.9891, 0.9902, 0.9899]
@@ -429,23 +400,10 @@ elif page == "📊 Model Performance":
                                      line=dict(color='blue', width=2)))
         fig_acc.add_trace(go.Scatter(x=epochs, y=val_acc, mode='lines+markers', name='Validation Accuracy',
                                      line=dict(color='red', width=2)))
-        fig_acc.update_layout(title="Training History - Accuracy", xaxis_title="Epoch", yaxis_title="Accuracy",
-                              yaxis_range=[0.93, 1.0], height=300)
+        fig_acc.update_layout(title="Training History - Accuracy", xaxis_title="Epoch",
+                              yaxis_title="Accuracy", yaxis_range=[0.93, 1.0], height=300)
         st.plotly_chart(fig_acc, use_container_width=True)
 
-        train_loss = [0.1579, 0.0874, 0.0726, 0.0613, 0.0546, 0.0518, 0.0516, 0.0474, 0.0444, 0.0430,
-                      0.0428, 0.0403, 0.0405, 0.0363, 0.0373, 0.0386, 0.0294, 0.0303, 0.0274, 0.0291, 0.0290]
-        val_loss = [0.0607, 0.0512, 0.0507, 0.0490, 0.0529, 0.0441, 0.0450, 0.0387, 0.0482, 0.0437,
-                    0.0381, 0.0410, 0.0387, 0.0387, 0.0458, 0.0436, 0.0441, 0.0429, 0.0427, 0.0420, 0.0461]
-        fig_loss = go.Figure()
-        fig_loss.add_trace(go.Scatter(x=epochs, y=train_loss, mode='lines+markers', name='Training Loss',
-                                      line=dict(color='orange', width=2)))
-        fig_loss.add_trace(go.Scatter(x=epochs, y=val_loss, mode='lines+markers', name='Validation Loss',
-                                      line=dict(color='green', width=2)))
-        fig_loss.update_layout(title="Training History - Loss", xaxis_title="Epoch", yaxis_title="Loss", height=300)
-        st.plotly_chart(fig_loss, use_container_width=True)
-
-    st.markdown("### 🔄 Confusion Matrix")
     conf_matrix = np.array([[2319, 30], [24, 2666]])
     col1, col2 = st.columns([2, 1])
     with col1:
@@ -453,45 +411,27 @@ elif page == "📊 Model Performance":
             z=conf_matrix,
             x=['Predicted anomaly', 'Predicted normal'],
             y=['Actual anomaly', 'Actual normal'],
-            text=conf_matrix,
-            texttemplate="%{text}",
-            textfont={"size": 16, "color": "Black"},
-            colorscale='Blues',
-            showscale=True
+            text=conf_matrix, texttemplate="%{text}",
+            textfont={"size": 16}, colorscale='Blues'
         ))
-        fig_cm.update_layout(title="Confusion Matrix", xaxis_title="Predicted Label",
-                             yaxis_title="Actual Label", height=400)
+        fig_cm.update_layout(title="Confusion Matrix", height=400)
         st.plotly_chart(fig_cm, use_container_width=True)
     with col2:
         st.markdown("### 📊 Performance Metrics")
-        tp = conf_matrix[0, 0]
-        fn = conf_matrix[0, 1]
-        fp = conf_matrix[1, 0]
-        tn = conf_matrix[1, 1]
+        tp, fn, fp, tn = conf_matrix[0,0], conf_matrix[0,1], conf_matrix[1,0], conf_matrix[1,1]
         accuracy = (tp + tn) / (tp + tn + fp + fn)
-        precision_anomaly = tp / (tp + fp)
-        recall_anomaly = tp / (tp + fn)
-        precision_normal = tn / (tn + fn)
-        recall_normal = tn / (tn + fp)
-        f1_anomaly = 2 * (precision_anomaly * recall_anomaly) / (precision_anomaly + recall_anomaly)
-        f1_normal = 2 * (precision_normal * recall_normal) / (precision_normal + recall_normal)
-        metrics_data = {
-            'Metric': ['Accuracy', 'Precision (anomaly)', 'Recall (anomaly)', 'F1-Score (anomaly)',
-                       'Precision (normal)', 'Recall (normal)', 'F1-Score (normal)'],
-            'Value': [f'{accuracy*100:.2f}%', f'{precision_anomaly:.3f}', f'{recall_anomaly:.3f}',
-                      f'{f1_anomaly:.3f}', f'{precision_normal:.3f}', f'{recall_normal:.3f}', f'{f1_normal:.3f}']
-        }
-        metrics_df = pd.DataFrame(metrics_data)
-        st.dataframe(metrics_df, use_container_width=True, hide_index=True)
+        st.metric("Accuracy", f"{accuracy*100:.2f}%")
+        st.metric("Precision", "99%")
+        st.metric("Recall", "99%")
+        st.metric("F1-Score", "99%")
 
-    st.markdown("### 📊 Model Summary Statistics")
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric(label="Test Accuracy", value="98.93%", delta="0.5%")
     with col2:
         st.metric(label="Test Loss", value="0.0265", delta="-0.01")
     with col3:
-        st.metric(label="Training Time", value="25 epochs", delta="Early stopped")
+        st.metric(label="Training Epochs", value="21", delta="Early stopped")
 
 else:
     st.markdown('<div class="section-header">ℹ️ About Network Intrusion Detection System</div>', unsafe_allow_html=True)
@@ -499,15 +439,14 @@ else:
     with col1:
         st.markdown("""
         ### 🎯 System Overview
-        This Network Intrusion Detection System (NIDS) uses **Deep Learning** to identify potential security threats in real-time network traffic with high accuracy.
+        This Network Intrusion Detection System (NIDS) uses **Deep Learning** to identify
+        potential security threats in real-time network traffic with high accuracy.
 
         ### ✨ Key Features
         - **Real-time Detection**: Instant analysis of network connections
         - **Deep Learning Model**: 3-layer neural network with regularization
         - **High Accuracy**: 98.93% detection rate
-        - **Multi-class Support**: Identifies various types of attacks
         - **User-friendly Interface**: Easy-to-use dashboard
-        - **Historical Tracking**: Keep record of all predictions
 
         ### 🛡️ Detection Capabilities
         - DoS (Denial of Service)
@@ -520,7 +459,6 @@ else:
         st.markdown("""
         ### 🔧 Technical Specifications
         - **Model Type**: Deep Neural Network (TensorFlow/Keras)
-        - **Architecture**: 3 Hidden Layers with Dropout & BatchNorm
         - **Features Used**: 41 network connection features
         - **Training Data**: KDD Cup 99 Dataset
         - **Framework**: TensorFlow, Streamlit
@@ -530,11 +468,10 @@ else:
         - **Precision**: 99%
         - **Recall**: 99%
         - **F1-Score**: 99%
-        - **AUC-ROC**: 0.99
 
         ### 📁 Required Files
-        - `dl_model.h5` - Trained Deep Learning model
-        - `scaler.pkl` - StandardScaler for feature normalization
-        - `label_encoders.pkl` - Encoders for categorical variables
-        - `target_encoder.pkl` - Encoder for target variable
+        - model_weights.npz
+        - scaler.pkl
+        - label_encoders.pkl
+        - target_encoder.pkl
         """)
