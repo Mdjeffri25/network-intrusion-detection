@@ -4,4 +4,4 @@ pandas
 scikit-learn
 joblib
 plotly
-tensorflow-cpu==2.15.0
+tensorflow-cpu
