@@ -76,6 +76,7 @@ streamlit run frontend.py
 Open browser
 
 http://localhost:8501
+https://intrudex.streamlit.app/
 Output
 
 The system predicts whether network traffic is:
